@@ -30,11 +30,11 @@ STOREFRONT_HTML = """<!DOCTYPE html>
         <span><i class="fa-solid fa-shield-halved text-indigo-400 mr-1.5"></i> 2-Year Full Hardware Warranty</span>
       </div>
       <div class="flex items-center space-x-4">
-        <a href="http://localhost:3002" target="_blank" class="hover:text-white transition flex items-center">
-          <i class="fa-solid fa-gauge-high text-amber-400 mr-1"></i> Admin Panel (Port 3002)
+        <a href="http://localhost:3001/admin" class="hover:text-white transition flex items-center">
+          <i class="fa-solid fa-gauge-high text-amber-400 mr-1"></i> Admin Panel (/admin)
         </a>
-        <a href="http://localhost:3000/docs" target="_blank" class="hover:text-white transition flex items-center">
-          <i class="fa-solid fa-code text-cyan-400 mr-1"></i> OpenAPI Specs (Port 3000)
+        <a href="http://localhost:8080/docs" target="_blank" class="hover:text-white transition flex items-center">
+          <i class="fa-solid fa-code text-cyan-400 mr-1"></i> OpenAPI Specs (Port 8080)
         </a>
       </div>
     </div>
@@ -106,7 +106,7 @@ STOREFRONT_HTML = """<!DOCTYPE html>
             <i class="fa-solid fa-bag-shopping"></i>
             <span>Browse Products</span>
           </button>
-          <a href="http://localhost:3002" target="_blank" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-6 py-3 rounded-xl transition flex items-center space-x-2">
+          <a href="http://localhost:3001/admin" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold px-6 py-3 rounded-xl transition flex items-center space-x-2">
             <i class="fa-solid fa-chart-line text-emerald-400"></i>
             <span>Launch Admin Portal</span>
           </a>
@@ -332,7 +332,7 @@ ADMIN_HTML = """<!DOCTYPE html>
           <i class="fa-solid fa-user-shield text-lg text-slate-400"></i>
           <span>RBAC Permissions</span>
         </a>
-        <a href="http://localhost:3001" target="_blank" class="flex items-center space-x-3 text-indigo-400 hover:bg-slate-800 px-4 py-3 rounded-xl font-semibold mt-8 border border-indigo-900/50">
+        <a href="http://localhost:3001" class="flex items-center space-x-3 text-indigo-400 hover:bg-slate-800 px-4 py-3 rounded-xl font-semibold mt-8 border border-indigo-900/50">
           <i class="fa-solid fa-store text-lg"></i>
           <span>Storefront App (3001)</span>
         </a>
@@ -417,58 +417,26 @@ ADMIN_HTML = """<!DOCTYPE html>
 </html>
 """
 
-class StorefrontHandler(http.server.SimpleHTTPRequestHandler):
+class UnifiedHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-type", "text/html")
         self.end_headers()
-        self.wfile.write(STOREFRONT_HTML.encode('utf-8'))
+        if self.path.startswith("/admin"):
+            self.wfile.write(ADMIN_HTML.encode('utf-8'))
+        else:
+            self.wfile.write(STOREFRONT_HTML.encode('utf-8'))
 
-class AdminHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-        self.wfile.write(ADMIN_HTML.encode('utf-8'))
-
-class APIHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-type", "application/json")
-        self.end_headers()
-        data = {
-            "name": "Enterprise E-Commerce API Gateway",
-            "version": "1.0.0",
-            "status": "UP",
-            "loc": 70465,
-            "test_pass_rate": "100%"
-        }
-        self.wfile.write(json.dumps(data, indent=2).encode('utf-8'))
-
-def start_server(port, handler_class):
-    with socketserver.TCPServer(("", port), handler_class) as httpd:
-        print(f"Serving HTTP on port {port}...")
-        httpd.serve_forever()
+class ReusableTCPServer(socketserver.TCPServer):
+    allow_reuse_address = True
 
 if __name__ == '__main__':
-    t1 = threading.Thread(target=start_server, args=(3001, StorefrontHandler))
-    t2 = threading.Thread(target=start_server, args=(3002, AdminHandler))
-    t3 = threading.Thread(target=start_server, args=(3000, APIHandler))
-
-    t1.daemon = True
-    t2.daemon = True
-    t3.daemon = True
-
-    t1.start()
-    t2.start()
-    t3.start()
-
-    print("==========================================================================")
-    print("UPDATED UI & ICONS SERVERS STARTED LOCALLY:")
-    print(" - Storefront App:  http://localhost:3001")
-    print(" - Admin Dashboard: http://localhost:3002")
-    print(" - API Gateway:     http://localhost:3000")
-    print("==========================================================================")
-
-    while True:
-        time.sleep(1)
+    port = 3001
+    print(f"Starting unified server on port {port}...")
+    with ReusableTCPServer(("", port), UnifiedHandler) as httpd:
+        print("==========================================================================")
+        print("WEB APP RUNNING LOCALLY:")
+        print(" - Storefront App:  http://localhost:3001")
+        print(" - Admin Dashboard: http://localhost:3001/admin")
+        print("==========================================================================")
+        httpd.serve_forever()
