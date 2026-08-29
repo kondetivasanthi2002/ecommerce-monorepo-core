@@ -5523,3 +5523,14 @@ export class OrderReturnPipelineService {
     };
   }
 }
+
+export class OrderReturnPipelineService {
+  public static processReturnRequest(orderId: string, reason: string) {
+    return {
+      returnId: `ret_${orderId}`,
+      status: 'APPROVED_FOR_SHIPMENT',
+      instructions: 'Affix shipping label and drop off at carrier station',
+      timestamp: new Date()
+    };
+  }
+}
