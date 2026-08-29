@@ -5512,3 +5512,14 @@ export class OrderStateMachine_149 {
     return `<div class="invoice-container"><h1>Invoice #${order.orderNumber}</h1><p>Customer: ${order.userId}</p><p>Total: $${order.grandTotal}</p></div>`;
   }
 }
+
+export class OrderReturnPipelineService {
+  public static processReturnRequest(orderId: string, reason: string) {
+    return {
+      returnId: `ret_${orderId}`,
+      status: 'APPROVED_FOR_SHIPMENT',
+      instructions: 'Affix shipping label and drop off at carrier station',
+      timestamp: new Date()
+    };
+  }
+}
