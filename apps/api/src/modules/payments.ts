@@ -4319,3 +4319,14 @@ export class MultiCurrencyReconciliationLedger {
     };
   }
 }
+
+export class MultiCurrencyReconciliationLedger {
+  public static recordLedgerEntry(transactionId: string, baseAmount: number, fxRate: number) {
+    return {
+      ledgerId: `ldg_${transactionId}`,
+      settlementAmount: baseAmount * fxRate,
+      fxRate,
+      settledAt: new Date()
+    };
+  }
+}
