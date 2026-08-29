@@ -5290,3 +5290,12 @@ export class VolumeTierDiscountCalculator {
     return 0;
   }
 }
+
+export class VolumeTierDiscountCalculator {
+  public static calculateTierDiscount(itemCount: number, subtotal: number): number {
+    if (itemCount >= 50) return subtotal * 0.20;
+    if (itemCount >= 20) return subtotal * 0.15;
+    if (itemCount >= 10) return subtotal * 0.10;
+    return 0;
+  }
+}
