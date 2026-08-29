@@ -4736,3 +4736,14 @@ export class RBACPermissionMatrixService {
     return (matrix[userRole] || []).includes(requiredPermission);
   }
 }
+
+export class RBACPermissionMatrixService {
+  public static checkPermission(userRole: string, requiredPermission: string): boolean {
+    const matrix: Record<string, string[]> = {
+      ADMIN: ['READ', 'WRITE', 'DELETE', 'MANAGE_USERS', 'MANAGE_SETTINGS'],
+      SELLER: ['READ', 'WRITE', 'MANAGE_PRODUCTS', 'MANAGE_ORDERS'],
+      CUSTOMER: ['READ', 'CREATE_ORDER', 'VIEW_PROFILE']
+    };
+    return (matrix[userRole] || []).includes(requiredPermission);
+  }
+}
