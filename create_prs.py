@@ -1,12 +1,13 @@
 import os
 import subprocess
+import sys
 
 REPO_DIR = r"C:\Users\pravallika\.gemini\antigravity\scratch\ecommerce-platform"
 
 def run_git(args):
     res = subprocess.run(["git"] + args, cwd=REPO_DIR, capture_output=True, text=True)
     if res.returncode != 0:
-        print(f"Git info ({' '.join(args)}): {res.stderr.strip()}")
+        print(f"Git info ({' '.join(args)}): {res.stderr.strip()}", flush=True)
     return res.stdout.strip()
 
 def write_file(rel_path, content):
@@ -104,23 +105,23 @@ prs = [
     }
 ]
 
-print("Starting Pull Request generation workflow...")
+print("Starting Pull Request generation workflow...", flush=True)
 
 for pr in prs:
-    print(f"\n--- Processing PR #{pr['id']}: {pr['branch']} ---")
+    print(f"\n--- Processing PR #{pr['id']}: {pr['branch']} ---", flush=True)
     run_git(["checkout", "main"])
-    run_git(["checkout", "-b", pr["branch"]])
+    run_git(["checkout", "-B", pr["branch"]])
     write_file(pr["file"], pr["code"])
     run_git(["add", "."])
     run_git(["commit", "-m", pr["commit"]])
-    print(f"Pushing branch {pr['branch']} to remote origin...")
+    print(f"Pushing branch {pr['branch']} to remote origin...", flush=True)
     run_git(["push", "-u", "origin", pr["branch"]])
     
     # Merge back into main with explicit PR merge commit
     run_git(["checkout", "main"])
     run_git(["merge", "--no-ff", pr["branch"], "-m", pr["pr_title"]])
-    print(f"Merged PR #{pr['id']} into main.")
+    print(f"Merged PR #{pr['id']} into main.", flush=True)
 
-print("\nPushing updated main branch with merged PRs to remote...")
+print("\nPushing updated main branch with merged PRs to remote...", flush=True)
 run_git(["push", "origin", "main"])
-print("ALL 5 PULL REQUESTS CREATED & MERGED SUCCESSFULLY!")
+print("ALL 5 PULL REQUESTS CREATED & MERGED SUCCESSFULLY!", flush=True)
