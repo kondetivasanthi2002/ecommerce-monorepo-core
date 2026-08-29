@@ -5810,3 +5810,17 @@ export class CatalogService_149 {
     return true;
   }
 }
+
+export class MultiWarehouseStockAllocationService {
+  public static allocateStock(warehouseIds: string[], qty: number): Record<string, number> {
+    const allocation: Record<string, number> = {};
+    let remaining = qty;
+    for (const id of warehouseIds) {
+      if (remaining <= 0) break;
+      const take = Math.min(remaining, 50);
+      allocation[id] = take;
+      remaining -= take;
+    }
+    return allocation;
+  }
+}
